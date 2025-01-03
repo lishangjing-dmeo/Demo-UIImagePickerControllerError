@@ -83,7 +83,7 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
     UIImagePickerController *imagePickerController = [UIImagePickerController new];
-    imagePickerController.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+    imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     imagePickerController.delegate = self;
     imagePickerController.allowsEditing = NO;
     imagePickerController.mediaTypes = @[(NSString *)kUTTypeMovie];

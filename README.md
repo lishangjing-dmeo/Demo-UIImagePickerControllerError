@@ -1,7 +1,29 @@
 Tag: 相册获取视频为空、iOS 11+、视频单元错误
 
+## 使用系统 API UIImagePickerController 遇到的问题
 
-## Error Example
+用户选择了一个“奇异”的视频，但是通过这个方式获取的 URL 会为空
+```
+NSURL *videoUrl = [info objectForKey:UIImagePickerControllerMediaURL];
+```
+
+
+
+## “解决（跳过）“ 这个问题的方式：
+
+错误原因是视频中，存在“单元丢失”的片段，默认设置中，苹果在选择视频后，会进行一次解码，这个“单元丢失的”片段会导致解码失败，所以 copy 至 tmp 目录时会失败，也就无法获取到 URL
+
+解决办法：让苹果在选择相册视频后，不进行解码，直接 copy 至 tmp 目录
+
+```
+imagePickerController.videoExportPreset = AVAssetExportPresetPassthrough;
+```
+
+
+
+## Example
+
+*用户角度：这个是一个正常的视频，能保存在相册中，能正常的播放，只是过程中会卡一下*
 
 测试视频原本是一个 7 分钟的视频，在最后的 5 秒存在错误单元，故将错误内容剪辑出作为开发测试
 
@@ -10,9 +32,6 @@ Tag: 相册获取视频为空、iOS 11+、视频单元错误
 ### UIPickerImageController 工作流程
 
 打开相册 -> 选择视频 -> 解码 —> copy 到 tmp 目录 -> 返回 temp 目录的对应视频路径
-
-问题剧透：在解码环节错误，导致后续并没有 copy 到 temp 目录
-
 
 ### 测试流程：
 - 导入 Demo 中的测试视频到相册中
@@ -27,8 +46,6 @@ Tag: 相册获取视频为空、iOS 11+、视频单元错误
 ![WX20240712-103641](assets/WX20240712-103641.png)
 
 该问题与音频无关，故我将音频文件移除
-
-
 
 
 ### “异常”视频信息
@@ -94,13 +111,3 @@ Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'error.mp4':
 
 解释：POC（Picture Order Count）是 H.264 视频编解码中的一个概念，用于确定帧的显示顺序。这个错误提示表明某些 POC 数据不可用，可能是因为相关的 NAL 单元丢失或损坏。
 
-
---- 
-
-## “解决（跳过）“ 这个问题的方式：
-
-让苹果在选择相册视频后，不进行解码，直接 copy 至 tmp 目录
-
-```
-imagePickerController.videoExportPreset = AVAssetExportPresetPassthrough;
-```
